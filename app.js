@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const path = require("path");
+const methodOverride = require("method-override");
 
 // Import Model (ONLY ONCE)
 const Listing = require("./models/listing");
@@ -20,6 +21,7 @@ main().catch(err => console.log(err));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
 
 // Home Route
 app.get("/", (req, res) => {
@@ -53,6 +55,30 @@ app.post("/listings", async (req, res) => {
     await Listing.create(listingData);
     res.redirect("/listings");
 });
+
+// Edit Route
+
+app.get("/listings/:id/edit", async (req, res) => {
+    const { id } = req.params;
+    const listing = await Listing.findById(id);
+    res.render("listings/edit.ejs", { listing });
+});
+
+
+// Update Route
+app.put("/listings/:id", async (req, res) => {
+    const { id } = req.params;
+    await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+    res.redirect("/listings/" + id);
+});
+// Delete Route
+
+app.delete("/listings/:id", async (req, res) => {
+    const { id } = req.params;
+    await Listing.findByIdAndDelete(id);
+    res.redirect("/listings");
+});
+
 
 
 
